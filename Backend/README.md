@@ -458,3 +458,33 @@ curl -X POST http://localhost:7100/captains/register \
     "location": { "latitude": 19.0760, "longitude": 72.8777 }
   }'
 ```
+
+---
+
+## Recent Changes & Fixes
+
+### 1. Captain Model Import
+- Changed all imports from `require('../models/captain.models')` to `require('../models/captain.model')` to match the actual filename.
+
+### 2. Authentication Middleware
+- Added and used `authCaptain` middleware from `middleware/auth.middleware.js` in captain routes for protected endpoints.
+
+### 3. Password Hashing and Comparison
+- Used `.select('+password')` when querying for captain in login to ensure password is available for bcrypt comparison.
+- Used `captainModel.hashPassword(password)` for password hashing in registration.
+
+### 4. Logout Logic
+- In both user and captain logout, token is now retrieved from Authorization header or cookie, then blacklisted and cookie cleared.
+
+### 5. JSON Request Validation
+- Ensured all request bodies sent to the API are valid JSON (no trailing commas, double quotes for property names).
+
+### 6. .gitignore
+- Added `node_modules/` to `.gitignore` to prevent pushing dependencies to Git.
+
+### 7. Error Handling
+- Improved error messages and logging for easier debugging.
+
+---
+
+**If you encounter errors, check your server logs for details and ensure your requests match the documented JSON structure.**
