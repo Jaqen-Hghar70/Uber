@@ -326,3 +326,135 @@ Unexpected server error.
 curl -X GET http://localhost:3000/users/profile \
   -H "Authorization: <jwt_token>"
 ```
+
+---
+
+# Captain Registration API Documentation
+
+## `/captains/register` Endpoint
+
+### Description
+Registers a new captain (driver) in the Uber system. Validates input, hashes the password, saves the captain, and returns a JWT token with captain data.
+
+---
+
+### Method
+`POST`
+
+---
+
+### Endpoint
+```
+/captains/register
+```
+
+---
+
+### Request Body
+Send a JSON object like:
+
+```json
+{
+  "fullName": {
+    "firstname": "Amit",
+    "lastname": "Sharma"
+  },
+  "email": "amit.sharma@example.com",
+  "password": "Captain@123",
+  "phone": "9876543210",
+  "vehicle": "Maruti Suzuki Swift",
+  "vehicleType": "car",
+  "capacity": 4,
+  "licenseNumber": "MH12AB1234",
+  "location": {
+    "latitude": 19.0760,
+    "longitude": 72.8777
+  }
+}
+```
+
+#### Field Requirements
+- `fullName.firstname` (string, required): Minimum 3 characters.
+- `fullName.lastname` (string, optional): Minimum 3 characters if provided.
+- `email` (string, required): Must be a valid email, minimum 5 characters.
+- `password` (string, required): Minimum 6 characters.
+- `phone` (string, required)
+- `vehicle` (string, required)
+- `vehicleType` (string, required): Must be one of `car`, `motorcycle`, or `auto`.
+- `capacity` (number, required): Must be a positive integer.
+- `licenseNumber` (string, required)
+- `location.latitude` (number, required)
+- `location.longitude` (number, required)
+
+---
+
+### Responses
+
+#### 201 Created
+```json
+{
+  "message": "Captain registered successfully",
+  "token": "<jwt_token>",
+  "captain": {
+    "_id": "<captain_id>",
+    "fullName": {
+      "firstname": "Amit",
+      "lastname": "Sharma"
+    },
+    "email": "amit.sharma@example.com",
+    "phone": "9876543210",
+    "vehicle": "Maruti Suzuki Swift",
+    "vehicleType": "car",
+    "capacity": 4,
+    "licenseNumber": "MH12AB1234",
+    "location": {
+      "latitude": 19.0760,
+      "longitude": 72.8777
+    },
+    "status": "inactive"
+  }
+}
+```
+
+#### 400 Bad Request
+Validation failed. Example:
+```json
+{
+  "errors": [
+    {
+      "msg": "First name is required",
+      "param": "fullName.firstname",
+      "location": "body"
+    }
+  ]
+}
+```
+
+#### 409 Conflict
+```json
+{
+  "message": "Captain with this email already exists"
+}
+```
+
+#### 500 Internal Server Error
+Unexpected server error.
+
+---
+
+### Example cURL Request
+```bash
+curl -X POST http://localhost:7100/captains/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullName": { "firstname": "Amit", "lastname": "Sharma" },
+    "email": "amit.sharma@example.com",
+    "password": "Captain@123",
+    "phone": "9876543210",
+    "vehicle": "Maruti Suzuki Swift",
+    "vehicleType": "car",
+    "capacity": 4,
+    "licenseNumber": "MH12AB1234",
+    "location": { "latitude": 19.0760, "longitude": 72.8777 }
+  }'
+```
