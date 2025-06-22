@@ -6,14 +6,10 @@ module.exports.createUser = async ({
   email,
   password
 }) => {
-  // if (!firstName || !email || !password) {
-  //   throw new Error('First name, email, and password are required');
-  // }
+  if (!firstname || !email || !password) {
+    throw new Error('First name, email, and password are required');
+  }
 
-  // Hash the password
-  // const hashedPassword = await userModel.hashPassword(password);
-
-  // Create the user object
   const user = new userModel({
     fullName: {
       firstname,
@@ -23,7 +19,11 @@ module.exports.createUser = async ({
     password
   });
 
-  // Save the user
-    
-      return user;
+  try {
+    await user.save();
+    return user;
+  } catch (err) {
+    console.error('Error creating user:', err);
+    throw new Error('User creation failed');
+  }
 };
