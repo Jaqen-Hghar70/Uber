@@ -1,31 +1,52 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { userDataContext } from '../context/userContext';
 
-function Captainlogin() {
+function UserSignup() {
+  const navigate = useNavigate();
+  const userContextValue = useContext(userDataContext);
+  const [user, setUser] = Array.isArray(userContextValue) ? userContextValue : [null, () => {}];
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
     setLoading(true);
+    const newUser = {
+      fullName: {
+        firstname,
+        lastname,
+      },
+      email,
+      password,
+    };
     try {
-      const res = await fetch('http://localhost:5000/api/captains/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Login failed');
-      setSuccess('Login successful!');
-      setEmail('');
-      setPassword('');
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/register`,
+        newUser
+      );
+      console.log('Signup response:', response);
+      if (response.status === 201) {
+        const data = response.data;
+        setUser(data.user);
+        setSuccess('Signup successful!');
+        navigate('/home');
+      } else {
+        setError('Signup failed.');
+      }
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.response?.data?.message || err.message || 'Signup failed.'
+      );
+      console.error('Signup error:', err);
     } finally {
       setLoading(false);
     }
@@ -46,18 +67,47 @@ function Captainlogin() {
     >
       <div className="absolute inset-0 bg-white bg-opacity-40 pointer-events-none z-0" />
       <form
-        onSubmit={handleLogin}
-        className="bg-white bg-opacity-90 px-4 py-6 sm:px-6 sm:py-8 rounded-xl shadow-lg flex flex-col gap-5 w-full max-w-xs sm:max-w-sm min-h-[320px] z-10 relative items-center border border-blue-100"
+        onSubmit={handleSignup}
+        className="bg-white bg-opacity-90 px-4 py-6 sm:px-6 sm:py-8 rounded-xl shadow-lg flex flex-col gap-5 w-full max-w-xs sm:max-w-sm min-h-[380px] z-10 relative items-center border border-blue-100"
       >
         <img
           src="https://th.bing.com/th/id/OIP.NF9pXP4AlXPqSgrCBRhnsQHaHa?rs=1&pid=ImgDetMain"
-          alt="Captain Login"
+          alt="User Signup"
           className="w-20 h-20 sm:w-24 sm:h-24 rounded-full shadow-lg object-cover border-4 border-white absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 bg-white"
         />
         <div className="mt-14 sm:mt-16 w-full flex flex-col items-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4">
-            Captain Login
+            User Signup
           </h2>
+        </div>
+        <div className="w-full flex gap-2">
+          <div className="w-1/2">
+            <label className="block text-gray-700 mb-1 text-sm sm:text-base">
+              First Name
+            </label>
+            <input
+              required
+              type="text"
+              placeholder="First Name"
+              value={firstname}
+              onChange={(e) => setFirstname(e.target.value)}
+              minLength={3}
+              className="w-full px-3 py-2 sm:px-4 sm:py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+            />
+          </div>
+          <div className="w-1/2">
+            <label className="block text-gray-700 mb-1 text-sm sm:text-base">
+              Last Name
+            </label>
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={lastname}
+              onChange={(e) => setLastname(e.target.value)}
+              minLength={3}
+              className="w-full px-3 py-2 sm:px-4 sm:py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+            />
+          </div>
         </div>
         <div className="w-full">
           <label className="block text-gray-700 mb-1 text-sm sm:text-base">
@@ -69,6 +119,7 @@ function Captainlogin() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            minLength={5}
             className="w-full px-3 py-2 sm:px-4 sm:py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
           />
         </div>
@@ -82,6 +133,7 @@ function Captainlogin() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
+            minLength={6}
             className="w-full px-3 py-2 sm:px-4 sm:py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
           />
         </div>
@@ -97,17 +149,17 @@ function Captainlogin() {
           className="mt-4 bg-blue-600 text-white py-2 sm:py-3 rounded hover:bg-blue-700 transition font-semibold text-base sm:text-lg w-full"
           disabled={loading}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'Signing up...' : 'Sign Up'}
         </button>
         <div className="w-full text-center mt-2">
           <span className="text-gray-600 text-sm sm:text-base">
-            Don't have an account?{' '}
+            Already have an account?{' '}
           </span>
           <Link
-            to="/captain-signup"
+            to="/user-login"
             className="text-blue-600 hover:underline font-semibold text-sm sm:text-base"
           >
-            Sign up as Captain
+            Login as User
           </Link>
         </div>
       </form>
@@ -115,4 +167,4 @@ function Captainlogin() {
   );
 }
 
-export default Captainlogin;
+export default UserSignup;

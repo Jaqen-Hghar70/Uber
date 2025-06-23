@@ -1,18 +1,49 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { userDataContext } from '../context/userContext';
+import axios from 'axios';
 
 function UserLogin() {
-    const [email, setEmail] = React.useState('')
-    const [password, setPassword] = React.useState('')
-    const [userData, setUserData] = React.useState(null)
-    const handleLogin = async (e) => {
-        e.preventDefault()
-        setUserData({ email, password })
-        // Add login logic here, e.g., API call to authenticate user
-        console.log('Logging in with:', { email, password })
-        setEmail('')
-        setPassword('')
+  const navigate = useNavigate();
+  const userContextValue = useContext(userDataContext);
+  const [user, setUser] = Array.isArray(userContextValue) ? userContextValue : [null, () => {}];
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    const userData = {
+      email,
+      password,
+    };
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/login`,
+        userData
+      );
+      if (response.status === 200) {
+        setUser(response.data.user);
+        localStorage.setItem('token', response.data.token);
+        navigate('/home');
+      } else {
+        setError('Login failed.');
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || err.message || 'Login failed.'
+      );
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
+      setEmail('');
+      setPassword('');
     }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-2 sm:px-4">
       <form onSubmit={handleLogin} className="bg-white px-4 py-8 sm:px-8 sm:py-12 rounded-2xl shadow-2xl flex flex-col gap-6 w-full max-w-md sm:max-w-lg min-h-[420px] sm:min-h-[520px] relative items-center">
@@ -32,7 +63,12 @@ function UserLogin() {
           <label className="block text-gray-700 mb-1 text-sm sm:text-base">Enter Password</label>
           <input required type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Password" className="w-full px-3 py-2 sm:px-4 sm:py-2 border rounded focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base" />
         </div>
-        <button className="mt-4 bg-black text-white py-2 sm:py-3 rounded hover:bg-gray-800 transition font-semibold text-base sm:text-lg w-full">Login</button>
+        {error && (
+          <div className="text-red-500 text-sm w-full text-center">{error}</div>
+        )}
+        <button className="mt-4 bg-black text-white py-2 sm:py-3 rounded hover:bg-gray-800 transition font-semibold text-base sm:text-lg w-full" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
         <div className="w-full text-center mt-2">
           <span className="text-gray-600 text-sm sm:text-base">Don't have an account? </span>
           <Link to="/user-signup" className="text-blue-600 hover:underline font-semibold text-sm sm:text-base">Sign up</Link>
@@ -43,7 +79,7 @@ function UserLogin() {
         </div>
       </form>
     </div>
-  )
+  );
 }
 
-export default UserLogin
+export default UserLogin;
