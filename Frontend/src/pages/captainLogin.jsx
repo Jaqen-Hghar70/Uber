@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { CaptainDataContext } from '../context/captainContext';
 
 export default function Captainlogin() {
   const [email, setEmail] = useState('');
@@ -7,6 +9,8 @@ export default function Captainlogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const { setCaptain } = useContext(CaptainDataContext);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -14,18 +18,19 @@ export default function Captainlogin() {
     setSuccess('');
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/captains/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Login failed');
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/captains/login`,
+        { email, password }
+      );
+      if (res.status!=200) throw new Error(res.data.message || 'Login failed');
       setSuccess('Login successful!');
+      setCaptain(res.data.captain);
       setEmail('');
       setPassword('');
+      navigate('/captain-home');
+      localStorage.setItem('captainToken', res.data.token);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || 'Login failed');
     } finally {
       setLoading(false);
     }

@@ -12,9 +12,9 @@ function Home() {
           alt="Uber Logo"
         />
         <img
-          className='w-full h-full object-cover min-h-[40vh] sm:min-h-[60vh] max-h-screen rounded-none sm:rounded-b-3xl'
+          className='absolute inset-0 w-full h-full object-cover rounded-none sm:rounded-b-3xl'
           style={{ minHeight: '40vh', maxHeight: '100vh' }}
-          src="https://images.unsplash.com/photo-1566243052021-d39ace07c392?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHRyYWZmaWMlMjBsaWdodHxlbnwwfHwwfHx8MA%3D%3D"
+          src="https://media.istockphoto.com/id/2195849508/photo/potsdamer-platz-at-sunet.webp?a=1&b=1&s=612x612&w=0&k=20&c=HiSSXNOL5Q0e4HJuqNAm5AJ6uFXHdt8Htj9HHMVg_7c="
           alt="Uber background"
         />
       </div>
